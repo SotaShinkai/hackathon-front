@@ -11,7 +11,7 @@ const Tweet: React.FC = () => {
   const [tweetContent, setTweetContent] = useState<string>('');
 
   useEffect(() => {
-    axios.get<Tweet[]>('https://your-backend-url/tweets')
+    axios.get<Tweet[]>('https://34.132.182.250/Hackathon/tweets')
       .then(response => {
         setTweets(response.data);
       })
@@ -21,7 +21,7 @@ const Tweet: React.FC = () => {
   }, []);
 
   const handleTweet = () => {
-    axios.post<Tweet>('https://your-backend-url/tweets', { content: tweetContent })
+    axios.post<Tweet>('https://34.132.182.250/Hackathon/tweets', { content: tweetContent })
       .then(response => {
         setTweets([...tweets, response.data]);
         setTweetContent('');

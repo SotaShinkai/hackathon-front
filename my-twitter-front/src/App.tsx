@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import SignUpForm from './SignUpForm';
 import LoginForm from './LoginForm';
-import Contents from './Contents';
-import ContentsFail from './ContentsFail'
+import LogoutForm from './LogoutForm'
+import Tweet from './Tweet'
 import { fireAuth } from './firebase'; // firebaseからfireAuthをインポート
 import { User, onAuthStateChanged } from 'firebase/auth'; // 必要なFirebase Authの型をインポート
 
@@ -25,9 +25,10 @@ const App: React.FC = () => {
             <>
               <SignUpForm />
               <LoginForm />
+              <LogoutForm />
             </>
         )}
-        {loginUser ? <Contents /> : <ContentsFail />}
+        {loginUser ? <Tweet /> :<Contentsfail />}
       </div>
   );
 };

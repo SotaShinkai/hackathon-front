@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { fireAuth, signOut} from './firebase';
 
 const LogoutForm: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+
     const [error, setError] = useState<string | null>(null); // エラーステートを追加
 
     const handleLogout = async () => {
