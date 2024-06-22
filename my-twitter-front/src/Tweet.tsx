@@ -1,46 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 interface Tweet {
   id: number;
+  username: string;
+  userid: string;
   content: string;
 }
 
-const Tweet: React.FC = () => {
-  const [tweets, setTweets] = useState<Tweet[]>([]);
+class TweetNoId {
+    username: string;
+    userid: string;
+    content: string;
+
+    constructor(username: string, userid: string, content: string) {
+        this.username= username;
+        this.userid = userid;
+        this.content= content;
+    }
+}
+
+type TweetProps = {
+    onSubmit: (content: string) => void;
+};
+
+const Tweet = (props: TweetProps) => {
   const [tweetContent, setTweetContent] = useState<string>('');
 
-  useEffect(() => {
-    axios.get<Tweet[]>('https://34.132.182.250/Hackathon/tweets')
-      .then(response => {
-        setTweets(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      props.onSubmit(tweetContent);
+      setTweetContent("");
+  }
 
-  const handleTweet = () => {
-    axios.post<Tweet>('https://34.132.182.250/Hackathon/tweets', { content: tweetContent })
-      .then(response => {
-        setTweets([...tweets, response.data]);
-        setTweetContent('');
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  };
 
   return (
-    <div>
-      <input type="text" value={tweetContent} onChange={(e) => setTweetContent(e.target.value)} placeholder="What's happening?" />
-      <button onClick={handleTweet}>Tweet</button>
-      <div>
-        {tweets.map((tweet) => (
-          <div key={tweet.id}>{tweet.content}</div>
-        ))}
-      </div>
-    </div>
+        <form onSubmit={submit}>
+            <input
+            type="text"
+            value={tweetContent}
+            onChange={(e) => setTweetContent(e.target.value)}
+            placeholder="What's happening?" />
+            <button type={"submit"}>Tweet</button>
+        </form>
+
   );
 };
 
