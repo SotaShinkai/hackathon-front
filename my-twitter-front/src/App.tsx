@@ -40,7 +40,7 @@ const App: React.FC = () => {
   }, [tweets])
 
   const fetchTweets = (tweets: Tweet[]): void => {
-    fetch('http://localhost:8080/user')
+    fetch('http://localhost:8080/tweets')
         .then(response => response.json())
         .then(data => {
           setTweets(data);
@@ -92,26 +92,30 @@ const App: React.FC = () => {
 
         const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            setUserName("");
-            setUserId("");
+
         };
 
         return (
-            <form onSubmit={handleSubmit}>
-                <label>Name: </label>
-                <input
-                    type={"text"}
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                ></input>
-                <label>Age: </label>
-                <input
-                    type={"text"}
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                ></input>
-                <button type={"submit"}>POST</button>
-            </form>
+            <div>
+                <form onSubmit={handleSubmit}>
+                    <label>Name: </label>
+                    <input
+                        type={"text"}
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                    ></input>
+                    <label>Id: </label>
+                    <input
+                        type={"text"}
+                        value={userId}
+                        onChange={(e) => setUserId(e.target.value)}
+                    ></input>
+                    <button type={"submit"}>POST</button>
+                </form>
+                <ul>
+                    Your username:{userName}, Your userid:{userId}
+                </ul>
+            </div>
         );
     };
 
@@ -130,7 +134,7 @@ const App: React.FC = () => {
                 <Profile />
                 <Tweet onSubmit={handleSubmitTweet}/>
                 {tweets.map((tweet) => (
-                    <div key={tweet.id}>{tweet.username}+","+{tweet.content}</div>
+                    <div key={tweet.id}>{tweet.username} {tweet.content}</div>
                 ))}
             </div>
             :<Contentsfail />}
