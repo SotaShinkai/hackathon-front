@@ -1,29 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-interface Tweet {
-  id: number;
-  username: string;
-  userid: string;
-  content: string;
-}
 
-class TweetNoId {
-    username: string;
-    userid: string;
-    content: string;
-
-    constructor(username: string, userid: string, content: string) {
-        this.username= username;
-        this.userid = userid;
-        this.content= content;
-    }
-}
 
 type TweetProps = {
     onSubmit: (content: string) => void;
 };
 
-const Tweet = (props: TweetProps) => {
+const TweetSubmit = (props: TweetProps) => {
   const [tweetContent, setTweetContent] = useState<string>('');
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -46,4 +29,4 @@ const Tweet = (props: TweetProps) => {
   );
 };
 
-export default Tweet;
+export default TweetSubmit;

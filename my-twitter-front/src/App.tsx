@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import SignUpForm from './SignUpForm';
 import LoginForm from './LoginForm';
 import LogoutForm from './LogoutForm';
-import Tweet from './Tweet';
+import TweetSubmit from './TweetSubmit';
+import TweetDisplay from './TweetDisplay'
 import Contentsfail from './Contentsfail';
 import { fireAuth } from './firebase'; // firebaseからfireAuthをインポート
 import { User, onAuthStateChanged } from 'firebase/auth'; // 必要なFirebase Authの型をインポート
@@ -20,12 +21,35 @@ class TweetNoId {
     }
 }
 
+class ReplyNoId {
+    username: string;
+    userid: string;
+    content: string;
+    totweetid: number;
+
+    constructor(username: string, userid: string, content: string, totweetid: number) {
+        this.username= username;
+        this.userid = userid;
+        this.content= content;
+        this.totweetid = totweetid;
+    }
+}
+
+interface Tweet {
+    id: number;
+    username: string;
+    userid: string;
+    content: string;
+    fav: number;
+    totweetid: number;
+}
+
 const App: React.FC = () => {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [loginUser, setLoginUser] = useState<User | null>(null); // User型を明示的に指定
-    const [userName, setUserName] = useState("");
-    const [userId, setUserId] = useState("");
-
+  const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [replies, setReplies] = useState<Tweet[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(fireAuth, (user) => {
@@ -50,6 +74,11 @@ const App: React.FC = () => {
         })
   }
 
+
+  const handleSubmitProfile = (submit: React.FormEvent<HTMLFormElement>) => {
+        submit.preventDefault();
+        console.log("onSubmit: ", userName, userId);
+  };
 
   const handleSubmitTweet = (content: string) => {
       if (!content) {
@@ -88,36 +117,51 @@ const App: React.FC = () => {
           });
   }
 
-    const Profile = () => {
+  const handleSubmitReply = (content: string, toTweetId: number) => {
 
-        const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
+      if (!content) {
+          alert("Please enter contents.");
+          return;
+      }
 
-        };
+      if (content.length >280) {
+          alert("Please enter contents shorter than 140 characters.")
+      }
 
-        return (
-            <div>
-                <form onSubmit={handleSubmit}>
-                    <label>Name: </label>
-                    <input
-                        type={"text"}
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                    ></input>
-                    <label>Id: </label>
-                    <input
-                        type={"text"}
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
-                    ></input>
-                    <button type={"submit"}>POST</button>
-                </form>
-                <ul>
-                    Your username:{userName}, Your userid:{userId}
-                </ul>
-            </div>
-        );
-    };
+      const addReply = (reply: Tweet) => {
+          setReplies([...replies, reply]);
+      }
+      const replyNoId: ReplyNoId = new ReplyNoId(userName, userId ,content, toTweetId);
+      console.log(replyNoId);
+      fetch('http://localhost:8080/tweets', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(replyNoId)
+      })
+          .then(response => response.json())
+          .then(data => {
+              console.log('succeed in post', data);
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });
+
+      fetch('http://localhost:8080/tweets')
+          .then(response => response.json())
+          .then(data => {
+              data.map((tweet: Tweet) => {
+                  
+              })
+              console.log('succeed in get', data)
+              setReplies(data);
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });
+  }
+
 
   return (
       <div>
@@ -131,11 +175,23 @@ const App: React.FC = () => {
         )}
         {loginUser ?
             <div>
-                <Profile />
-                <Tweet onSubmit={handleSubmitTweet}/>
-                {tweets.map((tweet) => (
-                    <div key={tweet.id}>{tweet.username} {tweet.content}</div>
-                ))}
+                <form onSubmit={handleSubmitProfile}>
+                    <label>UserName</label>
+                    <input
+                        type={"text"}
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                    ></input>
+                    <label>UserId</label>
+                    <input
+                        type={"text"}
+                        value={userId}
+                        onChange={(e) => setUserId(e.target.value)}
+                    ></input>
+                    <button type={"submit"}>Submit</button>
+                </form>
+                <TweetSubmit onSubmit={handleSubmitTweet}/>
+                <TweetDisplay tweets={tweets} replies={replies} handleSubmitReply={handleSubmitReply}/>
             </div>
             :<Contentsfail />}
       </div>
