@@ -16,36 +16,24 @@ interface ReplyDictionary {
 }
 
 interface TweetDisplayProps {
-    tweets: Tweet[];
-    replies: Tweet[];
+    soloTweets: Tweet[];
+    repliesAtTweet: ReplyDictionary;
     handleSubmitReply: (content: string, toTweetId: number) => void;
 }
 
-const TweetDisplay: React.FC<TweetDisplayProps> = ({tweets, replies,handleSubmitReply}) => {
-    const repliesAtTweet: ReplyDictionary = {};
+const TweetDisplay: React.FC<TweetDisplayProps> = ({soloTweets, repliesAtTweet, handleSubmitReply}) => {
 
-    tweets.forEach((tweet, index) =>　{
-        repliesAtTweet[tweet.id] = [];
-    })
-
-    replies.forEach((reply, index) => {
-        tweets.forEach((tweet, index) => {
-                if (reply.replyId === tweet.id) {
-                    repliesAtTweet[reply.replyId].push(tweet);
-                }
-            }
-        )
-    });
+    console.log("TweetDisplay;soloTweets:", soloTweets);
 
     return(
         <div>
-            {tweets.map((tweet: Tweet) => (
-                <div key={tweet.id}>user:{tweet.username} {tweet.content} fav:{tweet.fav}
+            {soloTweets.map((tweet: Tweet) => (
+                <div key={tweet.id}>user:{tweet.username} content:{tweet.content} fav:{tweet.fav}
                     <Fav id={tweet.id} />
                     <Reply onSubmit={handleSubmitReply} toTweetId={tweet.id}/>
-                    {repliesAtTweet[tweet.id].map((reply: Tweet) => (
+                    {repliesAtTweet[tweet.id]?.map((reply: Tweet) => (
                         <div key={reply.id}>
-                            user:{reply.username} @{tweet.userid} {reply.content} fav:{reply.fav}
+                            user:{reply.username} @{tweet.userid} reply:{reply.content} fav:{reply.fav}
                             <Fav id={tweet.id} />
                             <Reply onSubmit={handleSubmitReply} toTweetId={reply.id}/>
                         </div>

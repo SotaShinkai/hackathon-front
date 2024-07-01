@@ -9,25 +9,14 @@ import Contentsfail from './Contentsfail';
 import { fireAuth } from './firebase'; // firebaseからfireAuthをインポート
 import { User, onAuthStateChanged } from 'firebase/auth'; // 必要なFirebase Authの型をインポート
 
+
 class TweetNoId {
     username: string;
     userid: string;
     content: string;
+    replyId?: number | null;
 
-    constructor(username: string, userid: string, content: string) {
-        this.username= username;
-        this.userid = userid;
-        this.content= content;
-    }
-}
-
-class ReplyNoId {
-    username: string;
-    userid: string;
-    content: string;
-    replyId: number;
-
-    constructor(username: string, userid: string, content: string, totweetid: number) {
+    constructor(username: string, userid: string, content: string, totweetid?: number | null) {
         this.username= username;
         this.userid = userid;
         this.content= content;
@@ -41,7 +30,11 @@ interface Tweet {
     userid: string;
     content: string;
     fav: number;
-    replyId?: number | null;
+    replyId: number;
+}
+
+interface ReplyDictionary {
+    [key: number]: Tweet[];
 }
 
 const App: React.FC = () => {
@@ -49,15 +42,8 @@ const App: React.FC = () => {
   const [loginUser, setLoginUser] = useState<User | null>(null); // User型を明示的に指定
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
-  const [replies, setReplies] = useState<Tweet[]>([]);
   const [soloTweets, setSoloTweets] = useState<Tweet[]>([]);
-
-    const addTweet = (tweet: Tweet) => {
-        setSoloTweets([...soloTweets, tweet]);
-    }
-    const addReply = (reply: Tweet) => {
-        setReplies([...replies, reply]);
-    }
+  const [repliesAtTweet, setRepliesAtTweet] = useState<ReplyDictionary>({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(fireAuth, (user) => {
@@ -68,22 +54,46 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchTweets(tweets);
-  }, [tweets]);
+    fetchTweets();
+  }, []);
+
+  useEffect(() => {
+      const soloTweetsList: Tweet[] = [];
+      const repliesList: Tweet[] = [];
+      const repliesDict: ReplyDictionary = {};
+
+      tweets.forEach((tweet) => {
+          if (tweet.replyId.toString() === "" || tweet.replyId === undefined) {
+              soloTweetsList.push(tweet);
+              repliesDict[tweet.id] = [];
+          } else {
+              repliesList.push(tweet);
+          }
+      });
+
+      repliesList.forEach((reply) => {
+          if (reply.replyId && repliesDict[reply.replyId]) {
+              repliesDict[reply.replyId].push(reply);
+          }
+      });
+
+      setSoloTweets(soloTweetsList);
+      setRepliesAtTweet(repliesDict);
+      console.log("solotweets:", soloTweetsList);
+      console.log("replies:", repliesList);
+      }, [tweets]);
 
 
-  const fetchTweets = (tweets: Tweet[]): void => {
+  const fetchTweets = (): void => {
     fetch(`http://localhost:8080/tweets`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             setTweets(data);
-            data.forEach((tweet: Tweet) => {
-                if(tweet.replyId === null) {
-                    addTweet(tweet);
-                } else {
-                    addReply(tweet);
-                }
-            });
         })
         .catch(error => {
           console.error('Error:', error);
@@ -107,7 +117,7 @@ const App: React.FC = () => {
       }
 
 
-      const tweetNoId: TweetNoId = new TweetNoId(userName, userId ,content);
+      const tweetNoId: TweetNoId = new TweetNoId(userName, userId ,content, null);
       fetch(`http://localhost:8080/tweets`, {
           method: 'POST',
           headers: {
@@ -118,12 +128,12 @@ const App: React.FC = () => {
           .then(response => response.json())
           .then(data => {
               console.log('succeed in post', data);
+              fetchTweets();
           })
           .catch(error => {
               console.error('Error:', error);
           });
 
-      fetchTweets(tweets);
   }
 
   const handleSubmitReply = (content: string, toTweetId: number) => {
@@ -138,7 +148,7 @@ const App: React.FC = () => {
       }
 
 
-      const replyNoId: ReplyNoId = new ReplyNoId(userName, userId ,content, toTweetId);
+      const replyNoId: TweetNoId = new TweetNoId(userName, userId ,content, toTweetId);
       console.log(replyNoId);
       fetch(`http://localhost:8080/tweets`, {
           method: 'POST',
@@ -150,12 +160,12 @@ const App: React.FC = () => {
           .then(response => response.json())
           .then(data => {
               console.log('succeed in post', data);
+              fetchTweets();
           })
           .catch(error => {
               console.error('Error:', error);
           });
 
-      fetchTweets(tweets);
   }
 
 
@@ -187,7 +197,7 @@ const App: React.FC = () => {
                     <button type={"submit"}>Submit</button>
                 </form>
                 <TweetSubmit onSubmit={handleSubmitTweet}/>
-                <TweetDisplay tweets={tweets} replies={replies} handleSubmitReply={handleSubmitReply}/>
+                <TweetDisplay soloTweets={soloTweets} repliesAtTweet={repliesAtTweet} handleSubmitReply={handleSubmitReply}/>
             </div>
             :<Contentsfail />}
       </div>
