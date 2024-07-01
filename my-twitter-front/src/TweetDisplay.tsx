@@ -8,7 +8,7 @@ interface Tweet {
     userid: string;
     content: string;
     fav: number;
-    totweetid: number;
+    replyId?: number | null;
 }
 
 interface ReplyDictionary {
@@ -30,8 +30,8 @@ const TweetDisplay: React.FC<TweetDisplayProps> = ({tweets, replies,handleSubmit
 
     replies.forEach((reply, index) => {
         tweets.forEach((tweet, index) => {
-                if (reply.totweetid === tweet.id) {
-                    repliesAtTweet[reply.totweetid].push(tweet);
+                if (reply.replyId === tweet.id) {
+                    repliesAtTweet[reply.replyId].push(tweet);
                 }
             }
         )

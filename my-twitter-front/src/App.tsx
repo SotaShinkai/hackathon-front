@@ -25,13 +25,13 @@ class ReplyNoId {
     username: string;
     userid: string;
     content: string;
-    totweetid: number;
+    replyId: number;
 
     constructor(username: string, userid: string, content: string, totweetid: number) {
         this.username= username;
         this.userid = userid;
         this.content= content;
-        this.totweetid = totweetid;
+        this.replyId = totweetid;
     }
 }
 
@@ -41,7 +41,7 @@ interface Tweet {
     userid: string;
     content: string;
     fav: number;
-    totweetid: number;
+    replyId?: number | null;
 }
 
 const App: React.FC = () => {
@@ -50,6 +50,14 @@ const App: React.FC = () => {
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [replies, setReplies] = useState<Tweet[]>([]);
+  const [soloTweets, setSoloTweets] = useState<Tweet[]>([]);
+
+    const addTweet = (tweet: Tweet) => {
+        setSoloTweets([...soloTweets, tweet]);
+    }
+    const addReply = (reply: Tweet) => {
+        setReplies([...replies, reply]);
+    }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(fireAuth, (user) => {
@@ -61,13 +69,21 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchTweets(tweets);
-  }, [tweets])
+  }, [tweets]);
+
 
   const fetchTweets = (tweets: Tweet[]): void => {
-    fetch('http://localhost:8080/tweets')
+    fetch(`http://localhost:8080/tweets`)
         .then(response => response.json())
         .then(data => {
-          setTweets(data);
+            setTweets(data);
+            data.forEach((tweet: Tweet) => {
+                if(tweet.replyId === null) {
+                    addTweet(tweet);
+                } else {
+                    addReply(tweet);
+                }
+            });
         })
         .catch(error => {
           console.error('Error:', error);
@@ -90,8 +106,9 @@ const App: React.FC = () => {
           alert("Please enter contents shorter than 140 characters.")
       }
 
+
       const tweetNoId: TweetNoId = new TweetNoId(userName, userId ,content);
-      fetch('http://localhost:8080/tweets', {
+      fetch(`http://localhost:8080/tweets`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -106,15 +123,7 @@ const App: React.FC = () => {
               console.error('Error:', error);
           });
 
-      fetch('http://localhost:8080/tweets')
-          .then(response => response.json())
-          .then(data => {
-              console.log('succeed in get', data)
-              setTweets(data);
-          })
-          .catch(error => {
-              console.error('Error:', error);
-          });
+      fetchTweets(tweets);
   }
 
   const handleSubmitReply = (content: string, toTweetId: number) => {
@@ -128,12 +137,10 @@ const App: React.FC = () => {
           alert("Please enter contents shorter than 140 characters.")
       }
 
-      const addReply = (reply: Tweet) => {
-          setReplies([...replies, reply]);
-      }
+
       const replyNoId: ReplyNoId = new ReplyNoId(userName, userId ,content, toTweetId);
       console.log(replyNoId);
-      fetch('http://localhost:8080/tweets', {
+      fetch(`http://localhost:8080/tweets`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -148,18 +155,7 @@ const App: React.FC = () => {
               console.error('Error:', error);
           });
 
-      fetch('http://localhost:8080/tweets')
-          .then(response => response.json())
-          .then(data => {
-              data.map((tweet: Tweet) => {
-                  
-              })
-              console.log('succeed in get', data)
-              setReplies(data);
-          })
-          .catch(error => {
-              console.error('Error:', error);
-          });
+      fetchTweets(tweets);
   }
 
 
