@@ -85,7 +85,7 @@ const App: React.FC = () => {
 
 
   const fetchTweets = (): void => {
-    fetch(`http://localhost:8080/tweets`)
+    fetch(`https://hackathon2-fprfp6fbkq-uc.a.run.app/tweets`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -118,7 +118,7 @@ const App: React.FC = () => {
 
 
       const tweetNoId: TweetNoId = new TweetNoId(userName, userId ,content, null);
-      fetch(`http://localhost:8080/tweets`, {
+      fetch(`https://hackathon2-fprfp6fbkq-uc.a.run.app/tweets`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ const App: React.FC = () => {
 
       const replyNoId: TweetNoId = new TweetNoId(userName, userId ,content, toTweetId);
       console.log(replyNoId);
-      fetch(`http://localhost:8080/tweets`, {
+      fetch(`https://hackathon2-fprfp6fbkq-uc.a.run.app/tweets`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

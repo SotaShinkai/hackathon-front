@@ -10,7 +10,7 @@ interface FavId {
 }
 
 const Fav: React.FC<FavProps> = ( {id} ) => {
-    const url = `http://localhost:8080/tweets`;
+    const url = `https://hackathon2-fprfp6fbkq-uc.a.run.app/tweets`;
     const [isFaved, setIsFaved] = useState(false);
 
 
