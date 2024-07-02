@@ -6,7 +6,7 @@ import LogoutForm from './LogoutForm';
 import TweetSubmit from './TweetSubmit';
 import TweetDisplay from './TweetDisplay'
 import Contentsfail from './Contentsfail';
-import { fireAuth } from './firebase'; // firebaseからfireAuthをインポート
+import { fireAuth } from './firebase'; //firebaseからfireAuthをインポート
 import { User, onAuthStateChanged } from 'firebase/auth'; // 必要なFirebase Authの型をインポート
 
 
